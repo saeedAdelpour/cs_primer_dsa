@@ -37,9 +37,15 @@ class Deque:
 
     def push_left(self, val):
         node = Node(val)
-        if self.size > 0:
+        if self.size == 0:
+            self.head = node
+            self.tail = node
+        else:
+            self.head = self.tail
+            self.head.prev = node
+
             node.next = self.tail
-        self.tail = node
+            self.tail = node
 
         self.size += 1
 
@@ -70,9 +76,6 @@ if __name__ == "__main__":
     assert d.pop_right() is val1
     assert d.size == 0
 
-    print("ok1")
-    # raise Exception("done")
-
     # test basic push/pop left (stack semantics on other side)
     d.push_left(val1)
     assert d.size == 1
@@ -82,7 +85,6 @@ if __name__ == "__main__":
     assert d.size == 1
     assert d.pop_left() is val1
     assert d.size == 0
-    # raise Exception("done")
 
     # test push right, pop left side (queue semantics)
     d.push_right(val1)
@@ -90,7 +92,6 @@ if __name__ == "__main__":
     assert d.pop_left() is val1
     assert d.pop_left() is val2
     assert d.size == 0
-    # raise Exception("done")
 
     # test push left, pop right side (queue semantics)
     d.push_left(val1)
