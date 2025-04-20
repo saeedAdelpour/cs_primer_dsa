@@ -16,23 +16,29 @@ class Deque:
         if self.size == 0:
             self.head = node
             self.tail = node
-        else:
-            self.tail = self.head
-            self.tail.next = node
+            self.head.prev = self.tail
+            self.tail.next = self.head
 
+        else:
+            self.head.next = node
             node.prev = self.head
             self.head = node
 
         self.size += 1
 
     def pop_right(self):
-        if self.head is None:
-            raise ValueError("nothing in head. need to push")
+        if self.size == 0:
+            raise ValueError("nothing in tail. need to push")
+
         val = self.head.val
+
+        if self.size == 1:
+            self.tail = None
+            self.head = None
+        else:
+            self.head = self.head.prev
+
         self.size -= 1
-
-        self.head = self.head.prev
-
         return val
 
     def push_left(self, val):
@@ -40,21 +46,27 @@ class Deque:
         if self.size == 0:
             self.head = node
             self.tail = node
-        else:
-            self.head = self.tail
-            self.head.prev = node
+            self.head.prev = self.tail
+            self.tail.next = self.head
 
+        else:
+            self.tail.prev = node
             node.next = self.tail
             self.tail = node
 
         self.size += 1
 
     def pop_left(self):
-        if self.tail is None:
+        if self.size == 0:
             raise ValueError("nothing in tail. need to push")
+
         val = self.tail.val
 
-        self.tail = self.tail.next
+        if self.size == 1:
+            self.tail = None
+            self.head = None
+        else:
+            self.tail = self.tail.next
 
         self.size -= 1
         return val
@@ -99,4 +111,33 @@ if __name__ == "__main__":
     assert d.pop_right() is val1
     assert d.pop_right() is val2
     assert d.size == 0
+
+    # test push_right, push_right, push_right, push_left, pop_right, pop_right
+    d.push_right(val2)
+    d.push_right(val2)
+    d.push_left(val1)
+    assert d.pop_right() is val2
+    assert d.pop_right() is val2
+    assert d.size == 1
+    assert d.pop_right() is val1
+    assert d.size == 0
+
+    # more complex case
+    d.push_right(val2)
+    d.push_right(val1)
+    d.push_right(val2)
+    d.push_right(val1)
+    d.push_left(val1)
+    assert d.size == 5
+    assert d.pop_left() is val1
+    assert d.size == 4
+    assert d.pop_right() is val1
+    assert d.size == 3
+    assert d.pop_left() is val2
+    assert d.size == 2
+    assert d.pop_right() is val2
+    assert d.size == 1
+    assert d.pop_right() is val1
+    assert d.size == 0
+
     print("ok")
