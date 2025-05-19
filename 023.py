@@ -55,6 +55,39 @@ def merge_sort(_list):
     return merge_sort(result)
 
 
+def merge_sort_optimized(_list):
+    working = _list.copy()
+
+    def merge(left, mid, right):
+
+        il = left
+        ir = mid
+
+        for i in range(left, right):
+
+            if (ir != right and working[il] > working[ir]) or il == mid:
+                _list[i] = working[ir]
+                ir += 1
+            else:
+                _list[i] = working[il]
+                il += 1
+
+        for i in range(left, right):
+            working[i] = _list[i]
+
+    def sort(left, right):
+        if right - left <= 1:
+            return
+
+        mid = (left + right) // 2
+        sort(left, mid)
+        sort(mid, right)
+        merge(left, mid, right)
+
+    sort(0, len(_list))
+    return _list
+
+
 if __name__ == "__main__":
     test_cases = (
         (
@@ -97,6 +130,14 @@ if __name__ == "__main__":
     for _list, expect_output in test_cases:
         print("_list, expect_output", _list, expect_output)
         _sorted = merge_sort(_list)
+        assert (
+            _sorted == expect_output
+        ), f"_sorted={_sorted}, expect_output={expect_output}"
+    print("ok")
+
+    for _list, expect_output in test_cases:
+        print("_list, expect_output", _list, expect_output)
+        _sorted = merge_sort_optimized(_list)
         assert (
             _sorted == expect_output
         ), f"_sorted={_sorted}, expect_output={expect_output}"
