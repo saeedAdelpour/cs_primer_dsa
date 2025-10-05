@@ -60,8 +60,8 @@ class Graph:
             word_node.neighbors[new_word] = new_word_node
             new_word_node.neighbors[word] = word_node
 
-    def create_cluster(self, word, level=0, checklist=[]):
-        checklist.append(word)
+    def create_cluster(self, word, level=0, checklist=set()):
+        checklist.add(word)
 
         for new_word in get_new_words(word):
 
@@ -74,7 +74,7 @@ class Graph:
     def is_word_checked(self, new_word, checklist=[], directions={}):
         return new_word in checklist
 
-    def find_best_route(self, word1, word2, routes=[], checklist=[], level=0):
+    def find_best_route(self, word1, word2, routes=[], checklist=set(), level=0):
         if word1 in checklist:
             return routes
 
@@ -86,60 +86,79 @@ class Graph:
         node2 = self.nodes[word2]
 
         if node2.data in node1.neighbors:
-            # print("end", word1, word2)
-            self.add_to_routes(word1, word2, routes)
+            print("end", word1, word2)
+            self.add_to_routes(word1, word2, word2, routes, do_print=True)
             return routes
 
         for _n1 in node1.neighbors.values():
-            self.add_to_routes(node1.data, _n1.data, routes)
+            # print(
+            #     {
+            #         "_n1": _n1,
+            #         "node1": node1,
+            #         "routes": routes,
+            #         "checklist": checklist,
+            #     }
+            # )
+            # input("continue?")
 
-        checklist.append(word1)
+            self.add_to_routes(node1.data, _n1.data, word2, routes)
+
+        checklist.add(word1)
 
         for _n1 in node1.neighbors.values():
-            # if _n1.data == "stu":
-            #     print(node1, node1.neighbors)
 
             self.find_best_route(_n1.data, word2, routes, checklist, level + 1)
-            # break
-            checklist.append(_n1.data)
+            checklist.add(_n1.data)
+            # print({"routes": routes, "checklist": checklist})
         return routes
 
-    def add_to_routes(self, word1, word2, routes, do_print=False):
-        if word1 in ("sta"):
-            do_print = True
+    def add_to_routes(self, word1, word2, dest_word, routes, do_print=False):
+        # if word1 in (
+        #     # "sta",
+        #     "stu",
+        # ):
+        #     do_print = True
 
         # do_print = True
+        # do_print = False
 
-        if not do_print:
-            do_print = lambda *args, **kwargs: ...
+        if do_print:
+            log_job = self.write
         else:
-            do_print = print
+            log_job = lambda *args, **kwargs: ...
 
         # if word1 == "stu":
         #     self.write(routes, "routes.json")
 
-        do_print("-" * 40, word1, word2)
-        found_similar_routes = [r for r in routes if word2 in r]
-        do_print({"found_similar_routes": found_similar_routes})
+        # log_job("-" * 40, word1, word2)
+        found_similar_routes = [r for r in routes if word2 in r and r[-1] != dest_word]
+        log_job(
+            {"found_similar_routes": found_similar_routes},
+            "found_similar_routes_{}_{}.json".format(word1, word2),
+        )
         if not found_similar_routes:
-            routes_with_last_node = [r for r in routes if r[-1] == word1]
-            # do_print(
-            #     {
-            #         "routes_with_last_node": routes_with_last_node,
-            #         "routes": routes,
-            #         "len(routes)": len(routes),
-            #     }
-            # )
+            routes_with_last_node = [r for i, r in enumerate(routes) if r[-1] == word1]
+            log_job(
+                {
+                    "step": "before",
+                    "len(routes)": len(routes),
+                    "routes_with_last_node": routes_with_last_node,
+                    "routes": routes,
+                },
+                "{}_{}.json".format(word1, word2),
+            )
+
             if routes_with_last_node:
-                should_append = False
                 for r in routes_with_last_node:
-                    if should_append:
-                        r.append(word2)
-                    else:
-                        routes.append([*r, word2])
-                        should_append = False
+                    routes.append([*r, word2])
             else:
                 routes.append([word1, word2])
+
+            # if routes_with_last_node:
+            #     for r in routes_with_last_node:
+            #         r.append(word2)
+            # else:
+            #     routes.append([word1, word2])
 
     def write(self, data, path):
         with open(path, "w") as fp:
