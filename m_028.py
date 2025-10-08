@@ -1,9 +1,36 @@
 import json
+import re
+import time
 
 from rich import print
 from spellchecker import SpellChecker
 
 spell = SpellChecker()
+
+
+def read(path):
+    with open(path) as fp:
+        raise Exception("fail")
+        return json.load(fp)
+
+
+def load_state(state_file):
+    state = read(state_file)
+    found_similar_routes, routes_with_last_node, should_add_route, routes = [
+        state[k]
+        for k in [
+            "found_similar_routes",
+            "routes_with_last_node",
+            "should_add_route",
+            "routes",
+        ]
+    ]
+    word1, word2 = re.search(r"(\w{3})_(\w{3})\.json", state_file).groups()
+
+
+def unload_state():
+    word1, word2 = "pig", "sty"
+    del x
 
 
 def get_new_words(word):
@@ -87,7 +114,7 @@ class Graph:
 
         if node2.data in node1.neighbors:
             print("end", word1, word2)
-            self.add_to_routes(word1, word2, word2, routes, do_print=True)
+            self.add_to_routes(word1, word2, word2, routes, checklist)
             return routes
 
         for _n1 in node1.neighbors.values():
@@ -101,7 +128,7 @@ class Graph:
             # )
             # input("continue?")
 
-            self.add_to_routes(node1.data, _n1.data, word2, routes)
+            self.add_to_routes(node1.data, _n1.data, word2, routes, checklist)
 
         checklist.add(word1)
 
@@ -112,12 +139,12 @@ class Graph:
             # print({"routes": routes, "checklist": checklist})
         return routes
 
-    def add_to_routes(self, word1, word2, dest_word, routes, do_print=False):
-        # if word1 in (
-        #     # "sta",
-        #     "stu",
-        # ):
-        #     do_print = True
+    def add_to_routes(self, word1, word2, dest_word, routes, checklist, do_print=False):
+        if word1 in (
+            # "sta",
+            "reg",
+        ) or word2 in ("reg",):
+            do_print = True
 
         # do_print = True
         # do_print = False
@@ -131,22 +158,60 @@ class Graph:
         #     self.write(routes, "routes.json")
 
         # log_job("-" * 40, word1, word2)
-        found_similar_routes = [r for r in routes if word2 in r and r[-1] != dest_word]
+        found_similar_routes_idx = [
+            [i, r]
+            for i, r in enumerate(routes)
+            if r and r[-1] == word2 and r[-1] != dest_word
+        ]
+        found_similar_routes = [r[1] for r in found_similar_routes_idx]
+        routes_with_last_node = [
+            r for r in routes if r and r[-1] == word1 and word2 not in r
+        ]
+        x = self.get_min(found_similar_routes)
+        y = self.get_min(routes_with_last_node)
+        last_node_route_is_smaller = x is not None and y is not None and x > y
+        # last_node_route_is_smaller = False
+        # print(last_node_route_is_smaller)
+        should_add_route = (not found_similar_routes) or last_node_route_is_smaller
         log_job(
-            {"found_similar_routes": found_similar_routes},
-            "found_similar_routes_{}_{}.json".format(word1, word2),
+            {
+                "found_similar_routes": found_similar_routes,
+                "routes_with_last_node": routes_with_last_node,
+                "should_add_route": should_add_route,
+                "x": x,
+                "y": y,
+                "routes": routes,
+            },
+            "{}_state_found_similar_routes_{}_{}.json".format(
+                time.time(), word1, word2
+            ),
         )
-        if not found_similar_routes:
-            routes_with_last_node = [r for i, r in enumerate(routes) if r[-1] == word1]
-            log_job(
-                {
-                    "step": "before",
-                    "len(routes)": len(routes),
-                    "routes_with_last_node": routes_with_last_node,
-                    "routes": routes,
-                },
-                "{}_{}.json".format(word1, word2),
-            )
+
+        if last_node_route_is_smaller:
+            for i, _ in found_similar_routes_idx:
+                routes[i] = []
+
+        # if last_node_route_is_smaller and found_similar_routes:
+
+        log_job(
+            {
+                # "found_similar_routes": found_similar_routes,
+                # "routes_with_last_node": routes_with_last_node,
+                "should_add_route": should_add_route,
+                # "routes": routes,
+            },
+            "{}_found_similar_routes_{}_{}.json".format(time.time(), word1, word2),
+        )
+        if should_add_route:
+            # log_job(
+            #     {
+            #         "step": "before",
+            #         "len(routes)": len(routes),
+            #         "routes_with_last_node": routes_with_last_node,
+            #         "routes": routes,
+            #     },
+            #     "{}_{}.json".format(word1, word2),
+            # )
 
             if routes_with_last_node:
                 for r in routes_with_last_node:
@@ -159,6 +224,11 @@ class Graph:
             #         r.append(word2)
             # else:
             #     routes.append([word1, word2])
+
+    def get_min(self, routes):
+        if not routes:
+            return None
+        return min([len(r) for r in routes])
 
     def write(self, data, path):
         with open(path, "w") as fp:
