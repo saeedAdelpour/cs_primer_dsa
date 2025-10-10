@@ -8,39 +8,14 @@ from spellchecker import SpellChecker
 spell = SpellChecker()
 
 
-def read(path):
-    with open(path) as fp:
-        raise Exception("fail")
-        return json.load(fp)
-
-
-def load_state(state_file):
-    state = read(state_file)
-    found_similar_routes, routes_with_last_node, should_add_route, routes = [
-        state[k]
-        for k in [
-            "found_similar_routes",
-            "routes_with_last_node",
-            "should_add_route",
-            "routes",
-        ]
-    ]
-    word1, word2 = re.search(r"(\w{3})_(\w{3})\.json", state_file).groups()
-
-
-def unload_state():
-    word1, word2 = "pig", "sty"
-    del x
-
-
-def get_new_words(word):
+def get_new_words(word, checklist):
     chars = "abcdefghijklmnopqrstuvwxyz"
     for i in range(len(word)):
         for c in chars:
             new_word = word[:i] + c + word[i + 1 :]
             new_word_correction = spell.correction(new_word)
             is_new_word_correct = new_word == new_word_correction
-            if is_new_word_correct and new_word != word:
+            if is_new_word_correct and new_word != word and new_word not in checklist:
                 yield new_word
 
 
@@ -87,15 +62,22 @@ class Graph:
             word_node.neighbors[new_word] = new_word_node
             new_word_node.neighbors[word] = word_node
 
-    def create_cluster(self, word, checklist=set()):
-        checklist.add(word)
+    def create_cluster(self, word):
+        self.nodes = {}
+        todo_list = set()
+        checklist = set()
+        if len(todo_list) == 0:
+            todo_list.add(word)
 
-        for new_word in get_new_words(word):
+        while len(todo_list) != 0:
+            _word = todo_list.pop()
+            if _word not in checklist:
+                words = list(get_new_words(_word, checklist))
+                for new_word in words:
+                    self.check_exists_in_tails(_word, new_word)
+                    todo_list.add(new_word)
 
-            self.check_exists_in_tails(word, new_word)
-
-            if not self.is_word_checked(new_word, checklist):
-                self.create_cluster(new_word, checklist)
+            checklist.add(_word)
 
     def is_word_checked(self, new_word, checklist=[], directions={}):
         return new_word in checklist
@@ -160,14 +142,15 @@ class Graph:
 
 
 def main():
-    word1 = "pig"
-    word2 = "sty"
+    word1 = "word"
+    word2 = "noon"
     self = Graph()
 
-    self.create_cluster(word1, set())
-    x = self.find_best_route(word2, word1, [], set())
-    routes = sorted([r for r in x if r and r[-1] == word1], key=len, reverse=True)
-    print(routes)
+    self.create_cluster(word1, set(), set())
+    # print(self.nodes)
+    # x = self.find_best_route(word2, word1, [], set())
+    # routes = sorted([r for r in x if r and r[-1] == word1], key=len, reverse=True)
+    # print(routes)
 
 
 if __name__ == "__main__":
