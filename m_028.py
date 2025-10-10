@@ -8,7 +8,7 @@ from spellchecker import SpellChecker
 spell = SpellChecker()
 
 
-def get_new_words(word, checklist):
+def get_new_words(word, checklist=[]):
     chars = "abcdefghijklmnopqrstuvwxyz"
     for i in range(len(word)):
         for c in chars:
@@ -78,9 +78,6 @@ class Graph:
                     todo_list.add(new_word)
 
             checklist.add(_word)
-
-    def is_word_checked(self, new_word, checklist=[], directions={}):
-        return new_word in checklist
 
     def find_best_route(self, word1, word2):
 
