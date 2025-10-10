@@ -82,27 +82,28 @@ class Graph:
     def is_word_checked(self, new_word, checklist=[], directions={}):
         return new_word in checklist
 
-    def find_best_route(self, word1, word2, routes=[], checklist=set()):
-        if word1 in checklist:
-            return routes
+    def find_best_route(self, word1, word2):
+
+        routes = []
+        checklist = set()
+        todo_list = []
 
         node1 = self.nodes[word1]
         node2 = self.nodes[word2]
 
-        if node2.data in node1.neighbors:
-            self.add_to_routes(word1, word2, word2, routes)
-            return routes
+        if len(todo_list) == 0:
+            todo_list.append(word1)
 
-        for _n1 in node1.neighbors.values():
+        while len(todo_list) != 0:
+            _word1 = todo_list.pop(0)
+            if _word1 not in checklist:
+                _node1 = self.nodes[_word1]
 
-            self.add_to_routes(node1.data, _n1.data, word2, routes)
+                for __word1 in _node1.neighbors.keys():
+                    self.add_to_routes(_word1, __word1, word2, routes)
+                    todo_list.append(__word1)
 
-        checklist.add(word1)
-
-        for _n1 in node1.neighbors.values():
-
-            self.find_best_route(_n1.data, word2, routes, checklist)
-            checklist.add(_n1.data)
+                checklist.add(_word1)
         return routes
 
     def add_to_routes(self, word1, word2, dest_word, routes):
@@ -142,8 +143,8 @@ class Graph:
 
 
 def main():
-    word1 = "word"
-    word2 = "noon"
+    word1 = "altar"
+    word2 = "upset"
     self = Graph()
 
     self.create_cluster(word1, set(), set())
