@@ -80,7 +80,7 @@ class Graph:
             if any(v == cap for v in new_state.state.values()):
                 return routes
 
-            new_state, title = self.fill_from_jar_to_another_jar(
+            new_state, title = self.transfer_to_another_jar(
                 all_states, state, jar_1, jar_2, "1_2"
             )
             if state != new_state:
@@ -90,7 +90,7 @@ class Graph:
             if any(v == cap for v in new_state.state.values()):
                 return routes
 
-            new_state, title = self.fill_from_jar_to_another_jar(
+            new_state, title = self.transfer_to_another_jar(
                 all_states, state, jar_2, jar_1, "2_1"
             )
             if state != new_state:
@@ -150,10 +150,8 @@ class Graph:
             return all_states[key], title
         return all_states.setdefault(key, JarState(new_state_dict)), title
 
-    def fill_from_jar_to_another_jar(
-        self, all_states, state, jar_1, jar_2, extra_title
-    ):
-        title = f"fill_from_jar_to_another_jar_{extra_title}"
+    def transfer_to_another_jar(self, all_states, state, jar_1, jar_2, extra_title):
+        title = f"transfer_to_another_jar_{extra_title}"
         current_1 = state.state[jar_1]
         current_2 = state.state[jar_2]
 
@@ -184,9 +182,9 @@ def main():
         return any(x == cap for x in r[-1].end.state.values())
 
     self = Graph()
-    jar_1_cap = 4
-    jar_2_cap = 21
-    cap = 3
+    jar_1_cap = 3
+    jar_2_cap = 5
+    cap = 4
     routes = self.find_best_route(jar_1_cap, jar_2_cap, cap)
     routes = sorted(
         [r for r in routes if check(r, cap)], key=lambda r: len(r), reverse=True
