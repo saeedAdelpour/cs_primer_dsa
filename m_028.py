@@ -1,6 +1,4 @@
 import json
-import re
-import time
 
 from rich import print
 from spellchecker import SpellChecker
@@ -19,15 +17,6 @@ def get_new_words(word, checklist=[]):
                 yield new_word
 
 
-def check_exist_in_tails(word, new_word, tails):
-    for tail in tails:
-        if (tail[0] == word and tail[1] == new_word) or (
-            tail[0] == new_word and tail[1] == word
-        ):
-            return True
-    return False
-
-
 class Node:
     data: str
     neighbors: "dict[str, Node]"
@@ -41,10 +30,6 @@ class Node:
 
     def __eq__(self, other):
         return self.data == other.data
-
-
-class Tail:
-    pass
 
 
 class Graph:
@@ -64,10 +49,8 @@ class Graph:
 
     def create_cluster(self, word):
         self.nodes = {}
-        todo_list = set()
+        todo_list = {word}
         checklist = set()
-        if len(todo_list) == 0:
-            todo_list.add(word)
 
         while len(todo_list) != 0:
             _word = todo_list.pop()
@@ -83,13 +66,7 @@ class Graph:
 
         routes = []
         checklist = set()
-        todo_list = []
-
-        node1 = self.nodes[word1]
-        node2 = self.nodes[word2]
-
-        if len(todo_list) == 0:
-            todo_list.append(word1)
+        todo_list = [word1]
 
         while len(todo_list) != 0:
             _word1 = todo_list.pop(0)
@@ -140,15 +117,14 @@ class Graph:
 
 
 def main():
-    word1 = "altar"
-    word2 = "upset"
+    word1 = "pig"
+    word2 = "sty"
     self = Graph()
 
-    self.create_cluster(word1, set(), set())
-    # print(self.nodes)
-    # x = self.find_best_route(word2, word1, [], set())
-    # routes = sorted([r for r in x if r and r[-1] == word1], key=len, reverse=True)
-    # print(routes)
+    self.create_cluster(word1)
+    x = self.find_best_route(word2, word1)
+    routes = sorted([r for r in x if r and r[-1] == word1], key=len, reverse=True)
+    print(routes)
 
 
 if __name__ == "__main__":
