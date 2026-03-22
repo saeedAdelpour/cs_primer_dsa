@@ -104,6 +104,15 @@ def remove_not_better_from_todo_list(position, length, todo_list):
     return todo_list
 
 
+def draw_route(_map, route, path):
+    __map = _map.copy()
+    for p in route[1:-1]:
+        __map[p[0], p[1]] = "*"
+    out = "\n".join("".join(c for c in line) for line in __map)
+    with open(path, "w") as fp:
+        fp.write(out)
+
+
 def debug():
     path = sys.argv[1]
     with open(path) as fp:
@@ -132,6 +141,7 @@ def test():
         _map = np.array([list(x[:-1]) for x in _map])
         final_routes, max_todo_length = find_best_route(_map)
         route, length = sorted(final_routes, key=lambda _r: _r[1])[0]
+        draw_route(_map, route, f"{path}_route")
         assert length == expect_length, f"{length} != {expect_length}, {path}"
         assert (
             max_todo_length == expect_max_todo_length
