@@ -10,14 +10,20 @@ def choose(array, i=0, checking=[]):
         array = [4, 7, 8, 5, 3]
         then the numbers are: {4, 8, 3}, which sum = 15
     """
-    x = [_f for f in [(k - 1, k, k + 1) for k in checking] for _f in f]
+    checking_not_possible_idx = [
+        _f for f in [(k - 1, k, k + 1) for k in checking] for _f in f
+    ]
 
-    possible_idxs = [j for j in range(len(array)) if j not in (i - 1, i, i + 1, *x)]
-    if not possible_idxs:
-        idxs = [i] + checking
-        return sum([array[i] for i in idxs]), idxs
+    possible_idx = [
+        j
+        for j in range(len(array))
+        if j not in (i - 1, i, i + 1, *checking_not_possible_idx)
+    ]
+    if not possible_idx:
+        idx = [i] + checking
+        return sum([array[i] for i in idx]), idx
     res = []
-    for _i in possible_idxs:
+    for _i in possible_idx:
         out = choose(array, i, [*checking, _i])
 
         if isinstance(out, list):
