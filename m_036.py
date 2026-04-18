@@ -1,5 +1,33 @@
-import enum
 from rich import print
+
+
+def choose_iterative(xs):
+    pp, p = 0, 0
+    for x in xs:
+        pp, p = p, max(x + pp, p)
+    return p
+
+
+def choose_opt(xs):
+    memo = {}
+
+    def __choose_opt(ys):
+        try:
+            return memo[len(ys)]
+        except KeyError:
+            pass
+        if len(ys) in memo:
+            return memo[len(ys)]
+        if len(ys) == 1:
+            return ys[0]
+        if len(ys) == 0:
+            return 0
+        res = max(ys[0] + __choose_opt(ys[2:]), __choose_opt(ys[1:]))
+        memo[len(ys)] = res
+        return res
+
+    x = __choose_opt(xs)
+    return x
 
 
 def choose(array, i=0, checking=[]):
@@ -48,4 +76,10 @@ if __name__ == "__main__":
         _sum, _idx = out[0]
         assert expect_sum == _sum, (test_idx, _sum)
         assert expect_idx == _idx, (test_idx, _idx)
+
+        _sum_opt = choose_opt(array)
+        assert _sum_opt == expect_sum, (_sum_opt, expect_sum)
+
+        _sum_iterative = choose_iterative(array)
+        assert _sum_iterative == expect_sum, (_sum_iterative, expect_sum)
     print("ok")
