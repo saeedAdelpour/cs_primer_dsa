@@ -3,6 +3,20 @@ from rich import print
 
 
 def perfect_square(n):
+    """Return a minimum-length decomposition of ``n`` as a sum of perfect squares.
+
+    Uses memoized recursion: at each step, subtracts one square ``i**2`` for
+    ``i`` from ``floor(sqrt(n))`` down to ``2``, or uses ``1`` when no such
+    ``i`` exists. Among all decompositions, picks one with the fewest terms.
+
+    Args:
+        n: Non-negative integer to decompose.
+
+    Returns:
+        A pair ``(count, nums)`` where ``count`` is the number of summand and
+        ``nums`` is a tuple of those squares (each element is ``k*k`` for some
+        integer ``k``); their sum equals ``n``.
+    """
     memo = {}
 
     def __perfect_square(n, count=0, nums=tuple()):
