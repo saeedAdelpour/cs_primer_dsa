@@ -1,4 +1,4 @@
-def minimal_grid_path(grid, p=(0, 0), _sum=0):
+def minimal_grid_path(grid, p=(0, 0), _sum=0, path=()):
     """Minimum path sum from the top-left cell to the bottom-right cell.
 
     From ``(0, 0)``, you may move only one step **down** or **right** until you
@@ -18,7 +18,7 @@ def minimal_grid_path(grid, p=(0, 0), _sum=0):
     """
 
     if p[0] == len(grid) - 1 and p[1] == len(grid[0]) - 1:
-        return _sum
+        return _sum, path
 
     ps = list(
         filter(
@@ -29,7 +29,9 @@ def minimal_grid_path(grid, p=(0, 0), _sum=0):
             ),
         )
     )
-    return min(minimal_grid_path(grid, _p, _sum + get_n(grid, _p)) for _p in ps)
+    return min(
+        minimal_grid_path(grid, _p, _sum + get_n(grid, _p), (*path, _p)) for _p in ps
+    )
 
 
 def get_n(grid, p):
@@ -37,22 +39,24 @@ def get_n(grid, p):
 
 
 if __name__ == "__main__":
-    _sum = minimal_grid_path(
+    _sum, _path = minimal_grid_path(
         [
             [1, 2, 4, 3],
             [3, 4, 3, 2],
             [3, 6, 7, 3],
         ]
     )
-    assert _sum == 14, _sum
+    print(_sum, _path)
+    assert _sum == 14
 
-    _sum = minimal_grid_path(
+    _sum, _path = minimal_grid_path(
         [
             [1, 2, 2, 9],
             [3, 9, 3, 2],
             [3, 1, 9, 3],
         ]
     )
+    print(_sum, _path)
     assert _sum == 12, _sum
 
     print("ok")
